@@ -17,6 +17,8 @@ func DetailArticle(id int32) (dataRet models.Article, err error) {
 
 func CreateArticle(article models.Article) (dataRet models.Article, err error) {
 	err = repositories.Create(&article)
+	err = repositories.Detail(&article, int32(article.ID))
+
 	return article, err
 }
 

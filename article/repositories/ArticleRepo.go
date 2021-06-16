@@ -17,7 +17,7 @@ func Fetch(articles *[]models.Article) (err error) {
 
 func Detail(article *models.Article, id int32) (err error) {
 
-	if err = Config.DB.Where("id = ?", id).First(article).Error; err != nil {
+	if err = Config.DB.Preload("Author").Where("id = ?", id).First(article).Error; err != nil {
 		return err
 	}
 	return nil

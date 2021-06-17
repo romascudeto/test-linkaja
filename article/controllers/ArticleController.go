@@ -4,11 +4,9 @@ import (
 	"echo-framework/article/services"
 	"echo-framework/helper"
 	"echo-framework/models"
-	"fmt"
 	"net/http"
 	"strconv"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 )
 
@@ -43,31 +41,8 @@ func GetArticleByID(c echo.Context) error {
 func CreateArticle(c echo.Context) error {
 	var dataArticle models.Article
 	c.Bind(&dataArticle)
-	tokenString := c.Request().Header.Get("Authorization")
-	if tokenString == "" {
-		data := map[string]interface{}{
-			"message": "not authorized",
-			"status":  "token not found",
-		}
-		respErr := helper.ResponseError(data)
-		return c.JSON(http.StatusUnauthorized, respErr)
-	}
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if jwt.GetSigningMethod("HS256") != token.Method {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte("secret"), nil
-	})
-	claims := token.Claims.(jwt.MapClaims)
-	var id int64
-	for key, val := range claims {
-		if key == "id" {
-			idFloat64 := val.(float64)
-			id = int64(idFloat64)
-		}
-	}
-	dataArticle.AuthorID = id
+	mappingToken := helper.ParsingTokenJWT(c)
+	dataArticle.AuthorID = int64(mappingToken["id"].(float64))
 	createdData, err := services.CreateArticle(dataArticle)
 	if err != nil {
 		respErr := helper.ResponseError(map[string]interface{}{"message": err.Error()})

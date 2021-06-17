@@ -7,3 +7,4 @@ profile.out
 tmp.out
 tmp/*
 .env
+routes.json

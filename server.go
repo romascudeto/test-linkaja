@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-
-	"echo-framework/article"
-	"echo-framework/author"
-	Config "echo-framework/config"
+	Config "linkaja/config"
+	"linkaja/models"
+	"linkaja/routes"
+	"linkaja/seeders"
 
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
@@ -19,13 +19,13 @@ var err error
 func main() {
 	godotenv.Load()
 	Config.DB, err = gorm.Open("mysql", Config.DbURL(Config.BuildDBConfig()))
-
+	Config.DB.AutoMigrate(&models.Account{}, &models.Customer{})
+	seeders.InsertDefaultSeeder()
 	if err != nil {
 		fmt.Println("Status:", err)
 	}
 	e := echo.New()
-	article.Routes(e)
-	author.Routes(e)
+	routes.Routes(e)
 	data, _ := json.MarshalIndent(e.Routes(), "", "  ")
 	ioutil.WriteFile("routes.json", data, 0644)
 	e.Logger.Fatal(e.Start(":1323"))
